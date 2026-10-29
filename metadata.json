@@ -1,0 +1,6 @@
+{
+  "name": "OjhaX — Chandan Ojha | Personal Educational Website",
+  "description": "Personal educational platform by Chandan Ojha, Government Teacher and Social Science Educator. Explore chapter-wise notes, quizzes, Q&A, worksheets, and study materials for Classes 6 to 12 in Hindi and English Medium.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
