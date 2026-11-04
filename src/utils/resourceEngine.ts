@@ -1,8 +1,4 @@
-import { CURATED_SUBJECT_ENTRIES } from '../data/coreCurriculumData';
-import {
-  CLASS_SUBJECT_MAP,
-  synthesizeChaptersForSubject,
-} from '../data/subjectCatalogBlueprints';
+import { buildMediumCurriculumFromRepository } from '../content/contentRegistry';
 import {
   CLASSES,
   MEDIUMS,
@@ -24,46 +20,11 @@ import {
   SubjectMeta,
 } from '../types/education';
 
-function buildFullCurriculum(): Record<MediumId, MediumCurriculum> {
-  const mediums: MediumId[] = ['hindi', 'english'];
-  const result = {} as Record<MediumId, MediumCurriculum>;
-
-  for (const mediumId of mediums) {
-    result[mediumId] = {
-      mediumId,
-      classes: CLASSES.map((cls) => {
-        const subjectIds = CLASS_SUBJECT_MAP[cls.id];
-        return {
-          classId: cls.id,
-          subjects: subjectIds.map((subjectId) => {
-            const curated = CURATED_SUBJECT_ENTRIES.find(
-              (entry) =>
-                entry.mediumId === mediumId &&
-                entry.classId === cls.id &&
-                entry.subjectId === subjectId
-            );
-            if (curated) {
-              return {
-                subjectId,
-                chapters: curated.chapters,
-              };
-            }
-            return {
-              subjectId,
-              chapters: synthesizeChaptersForSubject(
-                mediumId,
-                cls.id,
-                subjectId,
-                cls.number
-              ),
-            };
-          }),
-        };
-      }),
-    };
-  }
-
-  return result;
+export function buildFullCurriculum(): Record<MediumId, MediumCurriculum> {
+  return {
+    hindi: buildMediumCurriculumFromRepository('hindi'),
+    english: buildMediumCurriculumFromRepository('english'),
+  };
 }
 
 export const FULL_CURRICULUM_STORE = buildFullCurriculum();

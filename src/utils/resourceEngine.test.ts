@@ -5,12 +5,26 @@ import {
   evaluateQuizSubmission,
   getAllMediums,
   getAvailableResourceTypes,
+  getChapterById,
   getChaptersForResourceType,
   getClassesForMedium,
   getSubjectsForClass,
+  isResourceAvailableInChapter,
   stepBackSelection,
 } from './resourceEngine';
+import {
+  ENGLISH_MEDIUM_REPOSITORY,
+  HINDI_MEDIUM_REPOSITORY,
+} from '../content/contentRegistry';
 import { ClassId, MediumId, ResourceTypeId, SubjectId } from '../types/education';
+
+test('Separate Hindi Medium and English Medium content repositories exist and are populated', () => {
+  assert.ok(HINDI_MEDIUM_REPOSITORY['class-6']?.['social-science']?.length);
+  assert.ok(HINDI_MEDIUM_REPOSITORY['class-7']?.['social-science']?.length);
+  assert.ok(HINDI_MEDIUM_REPOSITORY['class-10']?.['social-science']?.length);
+  assert.ok(ENGLISH_MEDIUM_REPOSITORY['class-6']?.['social-science']?.length);
+  assert.ok(ENGLISH_MEDIUM_REPOSITORY['class-10']?.['social-science']?.length);
+});
 
 test('Both Hindi Medium and English Medium expose all classes from Class 6 to Class 12', () => {
   const mediums = getAllMediums();
@@ -43,6 +57,51 @@ test('Classes 6-10 configure middle/secondary subjects and Classes 11-12 configu
   assert.ok(c11Subjects.includes('physics'));
   assert.ok(c11Subjects.includes('chemistry'));
   assert.ok(c11Subjects.includes('biology'));
+});
+
+test('New multi-chapter sample entries in Hindi and English Medium support all 9 resource types and filter empty resources', () => {
+  const all9Types: ResourceTypeId[] = [
+    'notes',
+    'summary',
+    'qa',
+    'quiz',
+    'practice',
+    'important',
+    'activities',
+    'worksheets',
+    'books',
+  ];
+
+  // Verify Hindi Class 7 Social Science Chapter 2 has all 9 resource types
+  const hiC7Ch2 = getChapterById('hindi', 'class-7', 'social-science', 'hi-c7-sst-ch2');
+  assert.ok(hiC7Ch2, 'Expected Hindi Class 7 Social Science Chapter 2 to exist');
+  for (const rt of all9Types) {
+    assert.equal(
+      isResourceAvailableInChapter(hiC7Ch2, rt),
+      true,
+      `Expected ${rt} to be available in hi-c7-sst-ch2`
+    );
+  }
+
+  // Verify English Class 6 Social Science Chapter 2 has all 9 resource types
+  const enC6Ch2 = getChapterById('english', 'class-6', 'social-science', 'en-c6-sst-ch2');
+  assert.ok(enC6Ch2, 'Expected English Class 6 Social Science Chapter 2 to exist');
+  for (const rt of all9Types) {
+    assert.equal(
+      isResourceAvailableInChapter(enC6Ch2, rt),
+      true,
+      `Expected ${rt} to be available in en-c6-sst-ch2`
+    );
+  }
+
+  // Verify both Chapter 1 and Chapter 2 are returned for Class 10 Social Science in Hindi and English
+  const hiC10Chs = getChaptersForResourceType('hindi', 'class-10', 'social-science', 'notes');
+  assert.equal(hiC10Chs.length, 2);
+  assert.deepEqual(hiC10Chs.map((c) => c.chapterNumber), [1, 2]);
+
+  const enC10Chs = getChaptersForResourceType('english', 'class-10', 'social-science', 'notes');
+  assert.equal(enC10Chs.length, 2);
+  assert.deepEqual(enC10Chs.map((c) => c.chapterNumber), [1, 2]);
 });
 
 test('All 7 required Hindi Medium and English Medium content paths resolve to meaningful chapter content', () => {
